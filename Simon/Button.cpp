@@ -5,12 +5,13 @@ Button::Button(byte pin) {
   lastReading = LOW;
   init();
 }
-Button::void init() {
-  pinMode(pin, INPUT);
+void Button::init() {
+  pinMode(pin, INPUT_PULLUP);
+  //pinMode(pin, INPUT);
   update();
 }
 
-Button::void update() {
+void Button::update() {
   byte newReading = digitalRead(pin);
   
   if (newReading != lastReading) {
@@ -22,11 +23,14 @@ Button::void update() {
   lastReading = newReading;
 }
 
-Button::byte getState() {
+byte Button::getState() {
   update();
   return state;
 }
 
-Button::bool isPressed() {
-  return (getState() == HIGH);
+bool Button::isPressed() {
+
+  return (digitalRead(pin) == LOW);
+
+  //return (getState() == HIGH);
 }

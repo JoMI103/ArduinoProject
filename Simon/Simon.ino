@@ -1,211 +1,106 @@
+#include "Arduino.h"
 #include "Led.h"
 #include "Button.h"
 
 
-Button sequenceButtons[6] = {A0,A1,A2,A3,4,2};
-Led sequenceLeds[6] = {3,5,6,9,10,11};
+Button sequenceButtons[4] = {A0,A1,A2,4}; //,A3,4,2};
+Led sequenceLeds[4] = {3,5,6,9}; //,9,10,11};
 
-int const sequenceOptions = 6;
-
-void setup()
-{
-  Serial.begin(9600);
-}
-
-void loop()
-{
-  ReadSequenceButtons();
-  delay(10);
-}
-
-
-void ReadSequenceButtons()
-{
-  int read = 0;
-	
-  for(int i = 0; i < sequenceOptions; i++)
-  {
-    if(sequenceButtons[i].isPressed()){
-      sequenceLeds[i].on();
-    }else{
-      sequenceLeds[i].off();
-    }
-  } 
-}
-
-/*
-
-
-class Led {
-  
-  private:
-  	byte pin;
-  
-  public: 
-    Led(byte pin) {
-      this->pin = pin;
-      init();
-    }
-  
-    void init() {
-      pinMode(pin, OUTPUT);
-    }
-  
-    void on() {
-      digitalWrite(pin, HIGH);
-    }
-    void off() {
-      digitalWrite(pin, LOW);
-            
-	}
-};
-
-
-class Button {
-  
-  private:
-    byte pin;
-    byte state;
-    byte lastReading;
-  
-    unsigned long lastDebounceTime = 0;
-    unsigned long debounceDelay = 20;
-  
-  public:
-    Button(byte pin) {
-      this->pin = pin;
-      lastReading = LOW;
-      init();
-    }
-    void init() {
-      pinMode(pin, INPUT);
-      update();
-    }
-  
-    void update() {
-      byte newReading = digitalRead(pin);
-      state = newReading;
-      return;
-      if (newReading != lastReading) {
-        lastDebounceTime = millis();
-      }
-      if (millis() - lastDebounceTime > debounceDelay) {
-        state = newReading;
-      }
-      lastReading = newReading;
-    }
-  
-    byte getState() {
-      update();
-      return state;
-    }
-  
-    bool isPressed() {
-      return (getState() == HIGH);
-    }
-};
-
-
-#include <Adafruit_LiquidCrystal.h>
-
-Adafruit_LiquidCrystal lcd_1(0);
-
-
-//Green,Yellow,Orange,Blue,Red,White
-Button sequenceButtons[6] = {A0,A1,A2,A3,4,2};
-Led sequenceLeds[6] = {3,5,6,9,10,11};
-
-int sequenceOptions;
-
+byte sequenceOptionsLength;
 byte lastPin = 0;
 
-
 byte sequence[100] {0};
-byte maxSequenceLength;
-byte sequenceCurrentLength = 0;
+byte sequenceLength;
+byte currentSequenceLength = 0;
+
+#define between_color_delay 500
+#define color_show_delay 1000
 
 
+bool CheckPlayerSequence();
+void AddSequenceDifficulty();
+void ShowCurrentSequence();
 
 void setup()
 {
-  randomSeed(analogRead(5));
-  
-  sequenceOptions = sizeof(sequenceLeds) / sizeof(Led);
-  maxSequenceLength =  sizeof(sequence) / sizeof(Led);
+  sequenceOptionsLength = sizeof(sequenceLeds) / sizeof(Led);
+  sequenceLength =  sizeof(sequence) / sizeof(byte);
   
   Serial.begin(9600);
-  lcd_1.begin(16, 2);
-  lcd_1.setCursor(0, 1);
-  lcd_1.print("hello worloooooooood");
+  //lcd_1.begin(16, 2);
+  //lcd_1.setCursor(0, 1);
+  //lcd_1.print("hello worloooooooood");
   
   AddSequenceDifficulty();
 }
 
 
 void loop()
-{
-  //ReadSequenceButtons();
-  
+{ 
   ShowCurrentSequence();
   
-  if(CheckSequence() == 1)
+  if(CheckPlayerSequence())
   {
     AddSequenceDifficulty();
-    Serial.println("Nova dificuldade");
   }
   else
   {
-    Serial.println("Reset");
-	sequenceCurrentLength = 0;
+    Serial.println("Wrong color. resetting game");
+	currentSequenceLength = 0;
   }
   
-  delay(500);
+  delay(1500);
+  Serial.println("Starting new game");
   
 }
 
 
 void AddSequenceDifficulty()
 {
-  sequence[sequenceCurrentLength] = random(0,sequenceOptions);
-  sequenceCurrentLength++;
-  if(sequenceCurrentLength >= maxSequenceLength){
-    //Winwin
-    sequenceCurrentLength = 0;
-  }
-	  
+  Serial.println("Adding difficulty");
+  sequence[currentSequenceLength] = random(0,sequenceOptionsLength);
+  currentSequenceLength++;
+  
+  if(currentSequenceLength >= sequenceLength)
+  {
+    Serial.println("Max score reached");
+    currentSequenceLength = 0;
+  }	  
 }
 
 void ShowCurrentSequence()
 {
-  for(int e = 0; e < sequenceCurrentLength; e++){
+  for(int e = 0; e < currentSequenceLength; e++)
+  {
     sequenceLeds[sequence[e]].on();
-    delay(200);
+    delay(color_show_delay);
     sequenceLeds[sequence[e]].off();
-    delay(100);
+    delay(between_color_delay);
   }
-  
 }
 
-int CheckSequence()
+bool CheckPlayerSequence()
 {
   byte currentOption = 0;
-  int e = 0;
-  while(e < sequenceCurrentLength)
+  byte element = 0;
+  
+  while(element < currentSequenceLength)
   {
-    for(int i = 0; i < sequenceOptions; i++)
+    for(int i = 0; i < sequenceOptionsLength; i++)
       {
-        if(sequenceButtons[i].isPressed()){
+        if(sequenceButtons[i].isPressed())
+        {
           Serial.println("entrou");
-          if(i == sequence[e])
+          if(i == sequence[element])
           {
-            e++;
+            element++;
             Serial.println("ok");
-            delay(100);
+            delay(500);
           }
           else
           {
             Serial.println("Errou");
-            return 0;
+            return false;
           }
         }
       }
@@ -213,17 +108,12 @@ int CheckSequence()
     
     delay(10);
   }
-  for(int e = 0; e < sequenceCurrentLength; e++)
-  {
-      
-       	
-    }
   
-	return 1;
+	return true;
 }
 
 
-
+/*
 void ReadSequenceButtons()
 {
   int read = 0;
@@ -237,28 +127,25 @@ void ReadSequenceButtons()
     }
   } 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

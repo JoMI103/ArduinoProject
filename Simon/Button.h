@@ -1,5 +1,6 @@
 #ifndef Jomi_Button_H
 #define Jomi_Button_H
+#include "Arduino.h"
 
 class Button {
 

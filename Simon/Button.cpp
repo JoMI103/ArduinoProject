@@ -29,6 +29,7 @@ byte Button::getState() {
 }
 
 bool Button::isPressed() {
+  
 
   return (digitalRead(pin) == LOW);
 

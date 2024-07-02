@@ -2,9 +2,15 @@
 #include "Led.h"
 #include "Button.h"
 
+#include "LiquidCrystal_I2C.h"
+#include  "Wire.h"
 
-Button sequenceButtons[4] = {A0,A1,A2,4}; //,A3,4,2};
-Led sequenceLeds[4] = {3,5,6,9}; //,9,10,11};
+LiquidCrystal_I2C lcd(0x27,  16, 2);
+
+
+
+Button sequenceButtons[5] = {A0,A1,A2,4, 2}; //,A3,4,2};
+Led sequenceLeds[5] = {3,5,6,9,10}; //,9,10,11};
 
 byte sequenceOptionsLength;
 byte lastPin = 0;
@@ -13,31 +19,34 @@ byte sequence[100] {0};
 byte sequenceLength;
 byte currentSequenceLength = 0;
 
-#define between_color_delay 500
-#define color_show_delay 1000
+#define between_color_delay 200
+#define color_show_delay 400
 
 
 bool CheckPlayerSequence();
 void AddSequenceDifficulty();
-void ShowCurrentSequence();
+void ShowCurrentSequence(byte);
 
 void setup()
 {
   sequenceOptionsLength = sizeof(sequenceLeds) / sizeof(Led);
   sequenceLength =  sizeof(sequence) / sizeof(byte);
   
-  Serial.begin(9600);
-  //lcd_1.begin(16, 2);
-  //lcd_1.setCursor(0, 1);
-  //lcd_1.print("hello worloooooooood");
-  
+
+  lcd.init();
+  lcd.backlight();
+
   AddSequenceDifficulty();
 }
 
 
 void loop()
 { 
-  ShowCurrentSequence();
+ 
+
+
+  
+  ShowCurrentSequence(0);
   
   if(CheckPlayerSequence())
   {
@@ -48,10 +57,18 @@ void loop()
     Serial.println("Wrong color. resetting game");
 	currentSequenceLength = 0;
   }
+
+
+
+  lcd.setCursor(0,0);
+  
+  lcd.print(currentSequenceLength);
+  
+
   
   delay(1500);
   Serial.println("Starting new game");
-  
+ // }
 }
 
 
@@ -68,14 +85,38 @@ void AddSequenceDifficulty()
   }	  
 }
 
-void ShowCurrentSequence()
+void ShowCurrentSequence(byte mode)
 {
-  for(int e = 0; e < currentSequenceLength; e++)
+  switch(mode)
   {
-    sequenceLeds[sequence[e]].on();
-    delay(color_show_delay);
-    sequenceLeds[sequence[e]].off();
-    delay(between_color_delay);
+    case 0:
+      for(int e = 0; e < currentSequenceLength; e++)
+      {
+        sequenceLeds[sequence[e]].on();
+        delay(color_show_delay);
+        sequenceLeds[sequence[e]].off();
+        delay(between_color_delay);
+      } 
+    break;
+
+    case 1:
+      for(int e = 0; e < currentSequenceLength; e++)
+      {
+        for(int l = 0; l < sequenceOptionsLength; l++){
+          if(l != sequence[e]){
+            sequenceLeds[l].on();  
+          }
+        }
+        delay(color_show_delay);
+
+        for(int l = 0; l < sequenceOptionsLength; l++){
+          if(l != sequence[e]){
+            sequenceLeds[l].off();  
+          }
+        }
+        delay(between_color_delay);
+      } 
+    break;
   }
 }
 
@@ -93,9 +134,15 @@ bool CheckPlayerSequence()
           Serial.println("entrou");
           if(i == sequence[element])
           {
+            sequenceLeds[i].on();
+            delay(10);
+            while(sequenceButtons[i].isPressed()){
+              delay(10);
+            }
             element++;
+            sequenceLeds[i].off();
             Serial.println("ok");
-            delay(500);
+           
           }
           else
           {
@@ -111,41 +158,5 @@ bool CheckPlayerSequence()
   
 	return true;
 }
-
-
-/*
-void ReadSequenceButtons()
-{
-  int read = 0;
-	
-  for(int i = 0; i < sequenceOptions; i++)
-  {
-    if(sequenceButtons[i].isPressed()){
-      sequenceLeds[i].on();
-    }else{
-      sequenceLeds[i].off();
-    }
-  } 
-}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -90,7 +90,7 @@ void AddSequenceDifficulty()
     currentSequenceLength = 0;
   }	 
 
-  tone(buzzer, 400, 100); 
+  //tone(buzzer, 400, 100); 
 }
 
 void ShowCurrentSequence(byte mode)

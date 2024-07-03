@@ -11,6 +11,7 @@ class Led {
     Led(byte pin);
     void init();
     void on();
+    void on(byte,int,int);
     void off();
 };
 #endif

@@ -5,63 +5,51 @@
 #include "LiquidCrystal_I2C.h"
 #include  "Wire.h"
 
+#define between_color_delay 200
+#define color_show_delay 400
+
 LiquidCrystal_I2C lcd(0x27,  16, 2);
 
 byte buzzer = 11;
 
-Button sequenceButtons[4] = {2,4,6,8}; //,A3,4,2};
-Led sequenceLeds[4] = {3,5,7,9}; //,9,10,11};
+int musicalNotes[4] = {440,622,659,554 };
+Button sequenceButtons[4] = {2,4,6,8}; //red,Green, blue, yellow
+Led sequenceLeds[4] = {3,5,7,9}; 
 
 byte sequenceOptionsLength;
-byte lastPin = 0;
 
-byte sequence[100] {0};
-byte sequenceLength;
 byte currentSequenceLength = 0;
+byte sequenceLength;
+byte sequence[100] {0};
 
-#define between_color_delay 200
-#define color_show_delay 400
 
+byte gameMode;
 
 bool CheckPlayerSequence();
 void AddSequenceDifficulty();
 void ShowCurrentSequence(byte);
+byte SelectMode();
 
 void setup()
 {
   sequenceOptionsLength = sizeof(sequenceLeds) / sizeof(Led);
   sequenceLength =  sizeof(sequence) / sizeof(byte);
   
-  //pinmode(buzzer, OUTPUT);
-
 
   lcd.init();
   lcd.backlight();
 
   AddSequenceDifficulty();
 
-  
+  gameMode = 0;
 }
 
 
 void loop()
 { 
-  while(false)
-{
+  gameMode = SelectMode();
 
-  for(byte i = 0; i < sequenceOptionsLength; i++){
-    sequenceLeds[i].on();
-  }
-  delay(1000);
-
-  for(byte i = 0; i < sequenceOptionsLength; i++){
-    sequenceLeds[i].off();
-  }
-  delay(1000);
-}
-
-  
-  ShowCurrentSequence(0);
+  ShowCurrentSequence(gameMode);
   
   if(CheckPlayerSequence())
   {
@@ -86,6 +74,9 @@ void loop()
  // }
 }
 
+byte SelectMode(){
+  return 0;
+}
 
 void AddSequenceDifficulty()
 {
@@ -109,7 +100,7 @@ void ShowCurrentSequence(byte mode)
     case 0:
       for(int e = 0; e < currentSequenceLength; e++)
       {
-        sequenceLeds[sequence[e]].on();
+        sequenceLeds[sequence[e]].on(buzzer,musicalNotes[sequence[e]], 100);
         delay(color_show_delay);
         sequenceLeds[sequence[e]].off();
         delay(between_color_delay);
@@ -151,7 +142,7 @@ bool CheckPlayerSequence()
           Serial.println("entrou");
           if(i == sequence[element])
           {
-            sequenceLeds[i].on();
+            sequenceLeds[i].on(buzzer,musicalNotes[i], 100);
             delay(10);
             while(sequenceButtons[i].isPressed()){
               delay(10);

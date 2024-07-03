@@ -13,6 +13,11 @@ void Led::on() {
   digitalWrite(pin, HIGH);
 }
 
+void Led::on(byte buzzer, int note,int duration) {
+  tone(buzzer,note,duration);
+  digitalWrite(pin, HIGH);
+}
+
 void Led::off() {
   digitalWrite(pin, LOW);            
 }

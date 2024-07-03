@@ -8,9 +8,8 @@
 LiquidCrystal_I2C lcd(0x27,  16, 2);
 
 
-
-Button sequenceButtons[5] = {A0,A1,A2,4, 2}; //,A3,4,2};
-Led sequenceLeds[5] = {3,5,6,9,10}; //,9,10,11};
+Button sequenceButtons[5] = {2,4,6,8}; //,A3,4,2};
+Led sequenceLeds[5] = {3,5,7,9}; //,9,10,11};
 
 byte sequenceOptionsLength;
 byte lastPin = 0;

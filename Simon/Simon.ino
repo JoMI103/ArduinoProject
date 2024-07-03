@@ -7,9 +7,10 @@
 
 LiquidCrystal_I2C lcd(0x27,  16, 2);
 
+byte buzzer = 11;
 
-Button sequenceButtons[5] = {2,4,6,8}; //,A3,4,2};
-Led sequenceLeds[5] = {3,5,7,9}; //,9,10,11};
+Button sequenceButtons[4] = {2,4,6,8}; //,A3,4,2};
+Led sequenceLeds[4] = {3,5,7,9}; //,9,10,11};
 
 byte sequenceOptionsLength;
 byte lastPin = 0;
@@ -31,18 +32,33 @@ void setup()
   sequenceOptionsLength = sizeof(sequenceLeds) / sizeof(Led);
   sequenceLength =  sizeof(sequence) / sizeof(byte);
   
+  //pinmode(buzzer, OUTPUT);
+
 
   lcd.init();
   lcd.backlight();
 
   AddSequenceDifficulty();
+
+  
 }
 
 
 void loop()
 { 
- 
+  while(false)
+{
 
+  for(byte i = 0; i < sequenceOptionsLength; i++){
+    sequenceLeds[i].on();
+  }
+  delay(1000);
+
+  for(byte i = 0; i < sequenceOptionsLength; i++){
+    sequenceLeds[i].off();
+  }
+  delay(1000);
+}
 
   
   ShowCurrentSequence(0);
@@ -81,7 +97,9 @@ void AddSequenceDifficulty()
   {
     Serial.println("Max score reached");
     currentSequenceLength = 0;
-  }	  
+  }	 
+
+  tone(buzzer, 400, 100); 
 }
 
 void ShowCurrentSequence(byte mode)

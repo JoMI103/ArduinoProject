@@ -11,6 +11,7 @@ void AddSequenceDifficulty();
 void ShowCurrentSequence(byte);
 byte SelectMode();
 
+
 #define between_color_delay 200
 #define color_show_delay 400
 
@@ -26,6 +27,11 @@ Led sequenceLeds[sequence_options_length] = {3,5,7,9};
 
 LiquidCrystal_I2C lcd(0x27,  16, 2);
 byte buzzer = 11;
+
+
+byte currentSequenceLength = 0;
+byte sequence[game_sequence_length] {0};
+
 
 struct Settings{
   bool Muted;
@@ -48,8 +54,6 @@ Player Mode0HighScore, Mode1HighScore;
 
 
 
-byte currentSequenceLength = 0;
-byte sequence[game_sequence_length] {0};
 
 
 
@@ -57,10 +61,20 @@ byte sequence[game_sequence_length] {0};
 
 void setup()
 {
+
+  Player l = EEPROM.get(0, currentPlayer);
+   Serial.print(l.name);
+
+  currentPlayer = Player{
+    0, 0, "Guest"
+  };
+
+  EEPROM.put(0, currentPlayer);
   lcd.init();
   lcd.backlight();
 
   AddSequenceDifficulty();
+
 
   //gameMode = 0;
 }
@@ -68,6 +82,7 @@ void setup()
 
 void loop()
 { 
+  while(true) delay(1000);
   //gameMode = SelectMode();
 
   ShowCurrentSequence(0);

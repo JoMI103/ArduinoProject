@@ -209,6 +209,7 @@ void MainMenu(){
        break;
       case 2:
 
+        selectedOptionHSMenu = -1;
         while(selectedOptionHSMenu != 0){
           if(changedHSMenu)
           {
@@ -224,8 +225,8 @@ void MainMenu(){
             case 0: break;
             case 1:
               checkingModeRecord++;
-              if(checkingModeRecord >= game_modes_number)
-              checkingModeRecord = 0;
+              //if(checkingModeRecord >= game_modes_number)
+              //checkingModeRecord = 0;
 
              break;
             default: changedHSMenu = false; break;
@@ -263,7 +264,8 @@ void SaveRecordMenu()
 
       for(int i = 0; i < 10; i++)
       {
-        if(i = selectedChar){
+        
+        if(i == selectedChar){
           final[i] = ',';
           
         }
@@ -272,12 +274,12 @@ void SaveRecordMenu()
         }
       }
 
-      if(selectedChar = 10)
+      if(selectedChar == 10)
         final[10] = '-';
-
-      if(selectedChar = 11)
+      
+      if(selectedChar == 11)
         final[11] = '>';
-
+      
       LcdPrint(String(final),String("") + "R:< " + "G:> " + "B:^ " + "Y:v" );
     }  
     changed = true;

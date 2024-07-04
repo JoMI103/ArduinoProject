@@ -11,9 +11,15 @@ void AddSequenceDifficulty();
 void ShowCurrentSequence(byte);
 byte SelectMode();
 
+bool NewRecord();
+void LoadScoreData();
+void SaveHighScore();
+
 
 #define between_color_delay 200
 #define color_show_delay 400
+
+#define game_modes_number 3
 
 #define sequence_options_length 4
 
@@ -48,7 +54,7 @@ struct Player{
 
 Player currentPlayer;
 
-Player Mode0HighScore, Mode1HighScore;
+Player modeHighScore[game_modes_number];
 
 
 
@@ -60,32 +66,27 @@ Player Mode0HighScore, Mode1HighScore;
 
 
 void setup()
-{
+{  
 
-  Player l = EEPROM.get(0, currentPlayer);
-   Serial.print(l.name);
+  Serial.begin(9600);
+  lcd.init();
+  lcd.backlight();
+  
+  LoadScoreData();
 
   currentPlayer = Player{
     0, 0, "Guest"
   };
 
-  EEPROM.put(0, currentPlayer);
-  lcd.init();
-  lcd.backlight();
-
   AddSequenceDifficulty();
-
-
-  //gameMode = 0;
 }
+
+
 
 
 void loop()
 { 
-  while(true) delay(1000);
-  //gameMode = SelectMode();
-
-  ShowCurrentSequence(0);
+  ShowCurrentSequence(currentPlayer.GameMode);
   
   if(CheckPlayerSequence())
   {
@@ -94,7 +95,17 @@ void loop()
   else
   {
     Serial.println("Wrong color. resetting game");
-	currentSequenceLength = 0;
+    if( NewRecord()){
+      //write name 
+      SaveHighScore();
+    }
+
+    for(int i = 0; i < 3; i++){
+      Serial.println(modeHighScore[i].name);
+      Serial.print(modeHighScore[i].Score);
+    }
+
+	  currentSequenceLength = 0;
   }
 
 
@@ -110,10 +121,60 @@ void loop()
  // }
 }
 
+#pragma region ScreenMenu Methods
+
 byte SelectMode(){
   return 0;
 }
+#pragma endregion ScreenMenu Methods
 
+#pragma region HighScore saving methods
+
+void LoadScoreData()
+{
+  for(int i = 0; i < game_modes_number; i++)
+  {
+    int startIndex = (i + 1) * 32;
+    modeHighScore[i].GameMode = EEPROM.read(startIndex);
+    modeHighScore[i].Score = EEPROM.read(startIndex + 1);
+
+    for(int n = 0; n < 10; n++){
+      modeHighScore[i].name[n] = EEPROM.read(startIndex + 2 + n);
+    }
+  }
+}
+
+
+bool NewRecord()
+{
+  int startIndex = (currentPlayer.GameMode + 1) * 32;
+  if(currentSequenceLength > EEPROM.read(startIndex)){
+    return true;
+  } else{
+    return false;
+  }
+}
+
+void SaveHighScore(){
+  int startIndex = (currentPlayer.GameMode + 1) * 32;
+  for(int i = startIndex; i < startIndex + 31; i++ ){
+    EEPROM.write(startIndex,0);
+  }
+
+  modeHighScore[currentPlayer.GameMode] = currentPlayer;
+
+
+    EEPROM.write(startIndex , modeHighScore[currentPlayer.GameMode].GameMode);
+    EEPROM.write(startIndex + 1 , modeHighScore[currentPlayer.GameMode].GameMode);
+    for(int n = 0; n < 10; n++){
+      EEPROM.write(startIndex + 2 + n ,modeHighScore[currentPlayer.GameMode].name[n]);
+    }
+
+}
+
+#pragma endregion HighScore saving methods
+
+#pragma region Sequence methods
 void AddSequenceDifficulty()
 {
   Serial.println("Adding difficulty");
@@ -202,3 +263,11 @@ bool CheckPlayerSequence()
   
 	return true;
 }
+
+#pragma endregion Sequence methods
+
+
+
+
+
+

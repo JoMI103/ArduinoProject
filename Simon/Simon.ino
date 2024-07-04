@@ -6,8 +6,8 @@
 #include "Led.h"
 #include "Button.h"
 
-bool CheckPlayerSequence();
-void AddSequenceDifficulty();
+bool CheckPlayerSequence(byte);
+void AddSequenceDifficulty(byte);
 void ShowCurrentSequence(byte);
 void MainMenu();
 
@@ -24,7 +24,7 @@ void LcdPrint(String, String);
 #define between_color_delay 200
 #define color_show_delay 400
 
-#define game_modes_number 3
+#define game_modes_number 4
 
 #define sequence_options_length 4
 
@@ -73,9 +73,6 @@ void setup()
     }
   }
   
-  //Serial.begin(9600);
-
-  //Serial.print("bom dia");
   lcd.init();
   lcd.backlight();
   
@@ -84,14 +81,11 @@ void setup()
   currentPlayer = Player{
     0, 0, "Guest"
   };
-
-  //AddSequenceDifficulty();
 }
 
 void loop()
 { 
-  //LcdPrint("OAL","EWJFWEO");
-  //while(true) delay(1000);
+
   MainMenu();
   delay(500);
   currentSequenceLength = 0;
@@ -99,12 +93,14 @@ void loop()
 
   while(currentSequenceLength != 0)
   {
-    LcdPrint(String("Score: ") + (currentSequenceLength - 1), "HS:");
-    //get highscore;
+    LcdPrint(
+      String("Score: ") + (currentSequenceLength - 1), 
+      String("") + "HS:" + modeHighScore[currentPlayer.GameMode].name + "-" + modeHighScore[currentPlayer.GameMode].Score);
+
 
     ShowCurrentSequence(currentPlayer.GameMode);
 
-    if(CheckPlayerSequence())
+    if(CheckPlayerSequence(currentPlayer.GameMode))
     {
       AddSequenceDifficulty();
     }
@@ -131,6 +127,7 @@ void loop()
   delay(1500);
 }
 
+#pragma region GetInputs
 int GetInput(){
   for(int i = 0; i < sequence_options_length; i++)
     {
@@ -164,6 +161,8 @@ int GetFreeInput(){
     return -1;
 }
 
+#pragma endregion GetInputs
+
 #pragma region LCD Methods
 
 //red, Green, blue, yellow
@@ -193,7 +192,7 @@ void LcdPrint(String firstRow, String secondRow){
 
 
 
-//nao tenho rogulho deste metodo mas da para o gasto :)
+//nao tenho rogulho deste codigo mas da para o gasto :)
 void MainMenu(){
   char sound;
 
@@ -402,8 +401,10 @@ void SaveHighScore()
 #pragma endregion HighScore saving methods
 
 #pragma region Sequence methods
-void AddSequenceDifficulty()
+
+void AddSequenceDifficulty(byte mode)
 {
+  
   Serial.println("Adding difficulty");
   sequence[currentSequenceLength] = random(0,sequence_options_length);
   currentSequenceLength++;
@@ -421,7 +422,7 @@ void ShowCurrentSequence(byte mode)
 {
   switch(mode)
   {
-    case 0:
+    case 0: case 2: case 3:
       for(int e = 0; e < currentSequenceLength; e++)
       {
         sequenceLeds[sequence[e]].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[sequence[e]], 100);
@@ -452,46 +453,83 @@ void ShowCurrentSequence(byte mode)
   }
 }
 
-bool CheckPlayerSequence()
+bool CheckPlayerSequence(byte mode)
 {
-  byte currentOption = 0;
-  byte element = 0;
+  byte element ;
   
-  while(element < currentSequenceLength)
+  switch(mode)
   {
-    for(int i = 0; i < sequence_options_length; i++)
+    case 0: 
+    case 1: 
+    case 3:
+    {
+      element = 0;
+      while(element < currentSequenceLength)
       {
-        if(sequenceButtons[i].isPressed())
-        {
-          if(i == sequence[element])
+        for(int i = 0; i < sequence_options_length; i++)
           {
-            sequenceLeds[i].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[i], 100);
-            delay(10);
-            while(sequenceButtons[i].isPressed()){
-              delay(10);
+            if(sequenceButtons[i].isPressed())
+            {
+              if(i == sequence[element])
+              {
+                sequenceLeds[i].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[i], 100);
+                delay(10);
+                while(sequenceButtons[i].isPressed()){
+                  delay(10);
+                }
+                element++;
+                sequenceLeds[i].Off();
+              
+              }
+              else
+              {
+                return false;
+              }
             }
-            element++;
-            sequenceLeds[i].Off();
-           
           }
-          else
-          {
-            return false;
-          }
-        }
+        
+        
+        delay(10);
       }
-    
-    
-    delay(10);
+    }
+
+    case 2:
+    {
+      element = currentSequenceLength - 1;
+      while(element >= 0)
+      {
+        for(int i = 0; i < sequence_options_length; i++)
+          {
+            if(sequenceButtons[i].isPressed())
+            {
+              if(i == sequence[element])
+              {
+                sequenceLeds[i].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[i], 100);
+                delay(10);
+                while(sequenceButtons[i].isPressed()){
+                  delay(10);
+                }
+                element--;
+                sequenceLeds[i].Off();
+              
+              }
+              else
+              {
+                return false;
+              }
+            }
+          }
+        
+        
+        delay(10);
+      }
+    }
   }
+
+  
   
 	return true;
 }
 
 #pragma endregion Sequence methods
-
-
-
-
-
 

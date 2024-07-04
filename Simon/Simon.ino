@@ -9,7 +9,7 @@
 bool CheckPlayerSequence();
 void AddSequenceDifficulty();
 void ShowCurrentSequence(byte);
-byte SelectMode();
+void MainMenu();
 
 bool NewRecord();
 void LoadScoreData();
@@ -67,11 +67,14 @@ Player modeHighScore[game_modes_number];
 
 void setup()
 {  
-  for(int i = 0; i < 250; i++){
-    EEPROM.write(i, 0);
+  if(false){
+    for(int i = 0; i < 250; i++){
+      EEPROM.write(i, 0);
+    }
   }
-
+  
   Serial.begin(9600);
+
   lcd.init();
   lcd.backlight();
   
@@ -89,6 +92,10 @@ void setup()
 
 void loop()
 { 
+
+  MainMenu();
+while(true) delay(1000);
+
   ShowCurrentSequence(currentPlayer.GameMode);
   
   if(CheckPlayerSequence())
@@ -126,8 +133,21 @@ void loop()
 
 #pragma region ScreenMenu Methods
 
-byte SelectMode(){
-  return 0;
+//red, Green, blue, yellow
+void LcdPrint(char firstRow[], char secondRow[]){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(firstRow);
+  
+  lcd.setCursor(0,1);
+  lcd.print(secondRow);
+}
+
+
+void MainMenu(){
+  LcdPrint("oal","fwsfjwe");
+
+
 }
 #pragma endregion ScreenMenu Methods
 

@@ -50,6 +50,9 @@ struct Player{
 };
 
 
+Settings currentSettings = {
+  false
+};
 
 
 Player currentPlayer;
@@ -131,6 +134,25 @@ while(true) delay(1000);
  // }
 }
 
+
+int GetInput(){
+  for(int i = 0; i < sequence_options_length; i++)
+    {
+      if(sequenceButtons[i].isPressed())
+      {
+        sequenceLeds[i].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[i], 100);
+        delay(10);
+        while(sequenceButtons[i].isPressed()){
+          delay(10);
+        }
+        sequenceLeds[i].Off();
+        return i;
+        
+      }
+    }
+    return -1;
+}
+
 #pragma region ScreenMenu Methods
 
 //red, Green, blue, yellow
@@ -143,10 +165,48 @@ void LcdPrint(char firstRow[], char secondRow[]){
   lcd.print(secondRow);
 }
 
+void LcdPrint(String firstRow, String secondRow){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(firstRow);
+  
+  lcd.setCursor(0,1);
+  lcd.print(secondRow);
+}
+
+
+
 
 void MainMenu(){
-  LcdPrint("oal","fwsfjwe");
+  char sound;
+  if(currentSettings.Muted) sound = "M"; else sound = "S";
 
+  LcdPrint( String("R-Play ") +"G-Mode:" + currentPlayer.GameMode ,String("B-HighScores") + "Y-" + sound );
+
+  int selectedOption = -1;
+
+  while(selectedOption != 0){
+    int selectedOption = GetInput();
+    
+    switch(selectedOption){
+      case 0: break;
+      case 1:
+        currentPlayer.GameMode++;
+        if(currentPlayer.GameMode >= game_modes_number)
+        currentPlayer.GameMode = 0;
+
+       break;
+      case 2:
+      
+
+      
+
+       break;
+      case 3: currentSettings.Muted = !currentSettings.Muted; break;
+    }
+    delay(10);
+
+  }
 
 }
 #pragma endregion ScreenMenu Methods
@@ -220,7 +280,7 @@ void ShowCurrentSequence(byte mode)
     case 0:
       for(int e = 0; e < currentSequenceLength; e++)
       {
-        sequenceLeds[sequence[e]].OnWithSound(true,buzzer,musicalNotes[sequence[e]], 100);
+        sequenceLeds[sequence[e]].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[sequence[e]], 100);
         delay(color_show_delay);
         sequenceLeds[sequence[e]].Off();
         delay(between_color_delay);
@@ -259,22 +319,19 @@ bool CheckPlayerSequence()
       {
         if(sequenceButtons[i].isPressed())
         {
-          Serial.println("entrou");
           if(i == sequence[element])
           {
-            sequenceLeds[i].OnWithSound(true,buzzer,musicalNotes[i], 100);
+            sequenceLeds[i].OnWithSound(currentSettings.Muted,buzzer,musicalNotes[i], 100);
             delay(10);
             while(sequenceButtons[i].isPressed()){
               delay(10);
             }
             element++;
             sequenceLeds[i].Off();
-            Serial.println("ok");
            
           }
           else
           {
-            Serial.println("Errou");
             return false;
           }
         }

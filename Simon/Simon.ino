@@ -113,7 +113,7 @@ void loop()
       LcdPrint("Wrong color", "resetting game");
       
       if( NewRecord()){
-        //write name 
+        SaveRecordMenu();
         SaveHighScore();
       }
 
@@ -249,6 +249,64 @@ void MainMenu(){
 
 void SaveRecordMenu()
 {
+  int selectedOption = -1;
+  bool changed = true;
+
+  int selectedChar = 0;
+  char name[10] {"          "};
+  char final[16];
+  while(selectedChar < 11){
+
+    if(changed)
+    {
+
+      for(int i = 0; i < 10; i++)
+      {
+        if(i = selectedChar){
+          final[i] = ',';
+          
+        }
+        if(i > selectedChar){
+          final[i+1] = name[i];  
+        }
+      }
+
+      if(selectedChar = 10)
+        final[10] = '-';
+
+      if(selectedChar = 11)
+        final[11] = '>';
+
+      LcdPrint(String(final),String("") + "R:< " + "G:> " + "B:^ " + "Y:v" );
+    }  
+    changed = true;
+
+    selectedOption = GetInput();
+
+    switch(selectedOption){
+      case 0: selectedChar--; if(selectedChar < 0) selectedChar = 0; break;
+      case 1:  selectedChar++;  break;
+      case 2: if(selectedChar < 10){
+        byte b = name[selectedChar];
+        b--;
+
+        if (b > 132) b = 101; 
+
+        name[selectedChar] = char(b);
+
+      } break;
+      case 3: if(selectedChar < 10){
+        byte b = name[selectedChar];
+        b--;
+
+        if (b < 101) b = 132; 
+
+        name[selectedChar] = char(b);
+
+      } break;
+      default: changed = false; break; 
+    }
+  }
 
 }
 
@@ -264,24 +322,30 @@ void LoadScoreData()
     modeHighScore[i].GameMode = EEPROM.read(startIndex);
     modeHighScore[i].Score = EEPROM.read(startIndex + 1);
 
-    for(int n = 0; n < 10; n++){
+    for(int n = 0; n < 10; n++)
+    {
       modeHighScore[i].name[n] = EEPROM.read(startIndex + 2 + n);
     }
   }
 }
 
-
 bool NewRecord()
 {
   int startIndex = (currentPlayer.GameMode + 1) * 32;
-  if(currentSequenceLength > EEPROM.read(startIndex + 1)){
+
+  if(currentSequenceLength > EEPROM.read(startIndex + 1))
+  {
     return true;
-  } else{
+  } 
+  else
+  {
     return false;
   }
 }
 
-void SaveHighScore(){
+void SaveHighScore()
+{
+
   int startIndex = (currentPlayer.GameMode + 1) * 32;
   for(int i = startIndex; i < startIndex + 31; i++ ){
     EEPROM.write(i,0);
@@ -290,11 +354,13 @@ void SaveHighScore(){
   modeHighScore[currentPlayer.GameMode] = currentPlayer;
 
 
-    EEPROM.write(startIndex , modeHighScore[currentPlayer.GameMode].GameMode);
-    EEPROM.write(startIndex + 1 , modeHighScore[currentPlayer.GameMode].Score);
-    for(int n = 0; n < 10; n++){
-      EEPROM.write(startIndex + 2 + n ,modeHighScore[currentPlayer.GameMode].name[n]);
-    }
+  EEPROM.write(startIndex , modeHighScore[currentPlayer.GameMode].GameMode);
+  EEPROM.write(startIndex + 1 , modeHighScore[currentPlayer.GameMode].Score);
+
+  for(int n = 0; n < 10; n++)
+  {
+    EEPROM.write(startIndex + 2 + n ,modeHighScore[currentPlayer.GameMode].name[n]);
+  }
 
 }
 

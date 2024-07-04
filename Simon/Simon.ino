@@ -14,6 +14,7 @@ void MainMenu();
 bool NewRecord();
 void LoadScoreData();
 void SaveHighScore();
+void SaveRecordMenu();
 
 void LcdPrint(char, char);
 void LcdPrint(String, String);
@@ -176,7 +177,7 @@ void LcdPrint(String firstRow, String secondRow){
 
 
 
-
+//nao tenho rogulho deste metodo mas da para o gasto :)
 void MainMenu(){
   char sound;
 
@@ -185,20 +186,18 @@ void MainMenu(){
   bool changed = true;
   int selectedOptionHSMenu = -1;
   bool changedHSMenu = true;
+  int checkingModeRecord = 0;
 
   while(selectedOption != 0){
 
-
-    if(changed){
+    if(changed)
+    {
       if(currentSettings.Muted) sound = 'm'; else sound ='s';
       LcdPrint( String("R-Play ") +"G-Mode:" + currentPlayer.GameMode ,String("B-HighScores") + " Y-" + sound );
-
     }  
-
+    changed = true;
 
     selectedOption = GetInput();
-    
-    changed = true;
 
     switch(selectedOption){
       case 0: break;
@@ -211,9 +210,27 @@ void MainMenu(){
       case 2:
 
         while(selectedOptionHSMenu != 0){
-
-
+          if(changedHSMenu)
+          {
+            LcdPrint( String("Mode:") + checkingModeRecord + " Record",String("") + modeHighScore[checkingModeRecord].name + "-" + modeHighScore[checkingModeRecord].Score);
+          }
+          changedHSMenu = true;
           
+          selectedOptionHSMenu = GetInput();
+
+
+          switch(selectedOption)
+          {
+            case 0: break;
+            case 1:
+              checkingModeRecord++;
+              if(checkingModeRecord >= game_modes_number)
+              checkingModeRecord = 0;
+
+             break;
+            default: changedHSMenu = false; break;
+          }
+
         }
 
       
@@ -228,6 +245,13 @@ void MainMenu(){
   }
 
 }
+
+
+void SaveRecordMenu()
+{
+
+}
+
 #pragma endregion ScreenMenu Methods
 
 #pragma region HighScore saving methods

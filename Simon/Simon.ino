@@ -67,6 +67,9 @@ Player modeHighScore[game_modes_number];
 
 void setup()
 {  
+  for(int i = 0; i < 250; i++){
+    EEPROM.write(i, 0);
+  }
 
   Serial.begin(9600);
   lcd.init();
@@ -148,7 +151,7 @@ void LoadScoreData()
 bool NewRecord()
 {
   int startIndex = (currentPlayer.GameMode + 1) * 32;
-  if(currentSequenceLength > EEPROM.read(startIndex)){
+  if(currentSequenceLength > EEPROM.read(startIndex + 1)){
     return true;
   } else{
     return false;
@@ -158,14 +161,14 @@ bool NewRecord()
 void SaveHighScore(){
   int startIndex = (currentPlayer.GameMode + 1) * 32;
   for(int i = startIndex; i < startIndex + 31; i++ ){
-    EEPROM.write(startIndex,0);
+    EEPROM.write(i,0);
   }
 
   modeHighScore[currentPlayer.GameMode] = currentPlayer;
 
 
     EEPROM.write(startIndex , modeHighScore[currentPlayer.GameMode].GameMode);
-    EEPROM.write(startIndex + 1 , modeHighScore[currentPlayer.GameMode].GameMode);
+    EEPROM.write(startIndex + 1 , modeHighScore[currentPlayer.GameMode].Score);
     for(int n = 0; n < 10; n++){
       EEPROM.write(startIndex + 2 + n ,modeHighScore[currentPlayer.GameMode].name[n]);
     }

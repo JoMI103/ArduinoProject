@@ -67,7 +67,7 @@ Player modeHighScore[game_modes_number];
 
 void setup()
 {  
-  if(false){
+  if(true){
     for(int i = 0; i < 250; i++){
       EEPROM.write(i, 0);
     }
@@ -89,7 +89,7 @@ void loop()
   MainMenu();
   delay(500);
   currentSequenceLength = 0;
-  AddSequenceDifficulty();
+  AddSequenceDifficulty(currentPlayer.GameMode);
 
   while(currentSequenceLength != 0)
   {
@@ -102,7 +102,7 @@ void loop()
 
     if(CheckPlayerSequence(currentPlayer.GameMode))
     {
-      AddSequenceDifficulty();
+      AddSequenceDifficulty(currentPlayer.GameMode);
     }
     else
     {
@@ -455,7 +455,7 @@ void ShowCurrentSequence(byte mode)
 
 bool CheckPlayerSequence(byte mode)
 {
-  byte element ;
+  int element ;
   
   switch(mode)
   {
@@ -492,7 +492,7 @@ bool CheckPlayerSequence(byte mode)
         delay(10);
       }
     }
-
+    break;
     case 2:
     {
       element = currentSequenceLength - 1;
@@ -524,6 +524,7 @@ bool CheckPlayerSequence(byte mode)
         delay(10);
       }
     }
+    break;
   }
 
   

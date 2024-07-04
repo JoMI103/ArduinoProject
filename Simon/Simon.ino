@@ -220,9 +220,9 @@ void MainMenu(){
           selectedOptionHSMenu = GetInput();
 
 
-          switch(selectedOption)
+          switch(selectedOptionHSMenu)
           {
-            case 0: break;
+            case 0: selectedOption = -1; break;
             case 1:
               checkingModeRecord++;
               //if(checkingModeRecord >= game_modes_number)
@@ -271,6 +271,8 @@ void SaveRecordMenu()
         }
         if(i > selectedChar){
           final[i+1] = name[i];  
+        }else{
+          final [i] = name[i];
         }
       }
 
@@ -290,21 +292,13 @@ void SaveRecordMenu()
       case 0: selectedChar--; if(selectedChar < 0) selectedChar = 0; break;
       case 1:  selectedChar++;  break;
       case 2: if(selectedChar < 10){
-        byte b = name[selectedChar];
-        b--;
+        
+        name[selectedChar]--;
 
-        if (b > 132) b = 101; 
-
-        name[selectedChar] = char(b);
 
       } break;
       case 3: if(selectedChar < 10){
-        byte b = name[selectedChar];
-        b--;
-
-        if (b < 101) b = 132; 
-
-        name[selectedChar] = char(b);
+         name[selectedChar]++;
 
       } break;
       default: changed = false; break; 

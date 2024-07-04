@@ -114,6 +114,7 @@ void loop()
       
       if( NewRecord()){
         SaveRecordMenu();
+        currentPlayer.Score = currentSequenceLength;
         SaveHighScore();
       }
 
@@ -265,12 +266,17 @@ void MainMenu(){
 
 void SaveRecordMenu()
 {
+  delay(250);
+
+  int nextDelay = 0;
   int selectedOption = -1;
   bool changed = true;
 
   int selectedChar = 0;
   char name[10] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
   char final[16] = {0};
+
+
   while(selectedChar < 11)
   {
      //LcdPrint("Cona","Cona" );
@@ -299,31 +305,42 @@ void SaveRecordMenu()
       
       LcdPrint(String(final),String("") + "R:< " + "G:> " + "B:^ " + "Y:v" );
     }  
+
+    delay(nextDelay);
+
     changed = true;
 
-    selectedOption = GetInput();
+    selectedOption = GetFreeInput();
 
     switch(selectedOption){
-      case 0: selectedChar--; if(selectedChar < 0) selectedChar = 0; break;
-      case 1:  selectedChar++;  break;
+      case 0: selectedChar--; if(selectedChar < 0) selectedChar = 0; nextDelay = 400; break;
+      case 1:  selectedChar++;   nextDelay = 400; break;
       case 2: if(selectedChar < 10){
         
+        if(name[selectedChar] <= 32)
+        name[selectedChar] = 'z';
+        else
         name[selectedChar]--;
-        if(name[selectedChar] < " ")
-        name[selectedChar] = "z";
 
+        nextDelay = 50;
 
       } break;
       case 3: if(selectedChar < 10){
+         if(name[selectedChar] >= 122)
+         name[selectedChar] = ' ';
+         else
          name[selectedChar]++;
-         if(name[selectedChar] > "z")
-         name[selectedChar] = " ";
+         nextDelay = 50;
 
       } break;
       default: changed = false; break; 
     }
 
-    delay(100);
+    delay(10);
+  }
+
+  for(int i = 0; i < 10; i++){
+    currentPlayer.name[i] = name[i];
   }
 
 }

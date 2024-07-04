@@ -57,8 +57,6 @@ byte sequence[game_sequence_length] {0};
 
 void setup()
 {
-  
-
   lcd.init();
   lcd.backlight();
 
@@ -72,7 +70,7 @@ void loop()
 { 
   //gameMode = SelectMode();
 
-  //ShowCurrentSequence(gameMode);
+  ShowCurrentSequence(0);
   
   if(CheckPlayerSequence())
   {
@@ -123,7 +121,7 @@ void ShowCurrentSequence(byte mode)
     case 0:
       for(int e = 0; e < currentSequenceLength; e++)
       {
-        sequenceLeds[sequence[e]].OnWithSound(false,buzzer,musicalNotes[sequence[e]], 100);
+        sequenceLeds[sequence[e]].OnWithSound(true,buzzer,musicalNotes[sequence[e]], 100);
         delay(color_show_delay);
         sequenceLeds[sequence[e]].Off();
         delay(between_color_delay);
@@ -165,7 +163,7 @@ bool CheckPlayerSequence()
           Serial.println("entrou");
           if(i == sequence[element])
           {
-            sequenceLeds[i].OnWithSound(false,buzzer,musicalNotes[i], 100);
+            sequenceLeds[i].OnWithSound(true,buzzer,musicalNotes[i], 100);
             delay(10);
             while(sequenceButtons[i].isPressed()){
               delay(10);

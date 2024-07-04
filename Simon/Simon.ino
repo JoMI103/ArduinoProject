@@ -1,39 +1,62 @@
 #include "Arduino.h"
+#include "LiquidCrystal_I2C.h"
+#include "Wire.h"
+#include "EEPROM.h"
+
 #include "Led.h"
 #include "Button.h"
-
-#include "LiquidCrystal_I2C.h"
-#include  "Wire.h"
-
-#define between_color_delay 200
-#define color_show_delay 400
-
-LiquidCrystal_I2C lcd(0x27,  16, 2);
-
-byte buzzer = 11;
-
-int musicalNotes[4] = {440,622,659,554 };
-Button sequenceButtons[4] = {2,4,6,8}; //red,Green, blue, yellow
-Led sequenceLeds[4] = {3,5,7,9}; 
-
-byte sequenceOptionsLength;
-
-byte currentSequenceLength = 0;
-byte sequenceLength;
-byte sequence[100] {0};
-
-
-byte gameMode;
 
 bool CheckPlayerSequence();
 void AddSequenceDifficulty();
 void ShowCurrentSequence(byte);
 byte SelectMode();
 
+#define between_color_delay 200
+#define color_show_delay 400
+
+#define sequence_options_length 4
+
+#define game_sequence_length 100
+
+
+//red, Green, blue, yellow
+int musicalNotes[sequence_options_length] = {440,622,659,554 };
+Button sequenceButtons[sequence_options_length] = {2,4,6,8}; 
+Led sequenceLeds[sequence_options_length] = {3,5,7,9}; 
+
+LiquidCrystal_I2C lcd(0x27,  16, 2);
+byte buzzer = 11;
+
+struct Settings{
+  bool Muted;
+};
+
+struct Player{
+  byte GameMode;
+  byte Score;
+  char name[10];
+};
+
+
+
+
+Player currentPlayer;
+
+Player Mode0HighScore, Mode1HighScore;
+
+
+
+
+
+byte currentSequenceLength = 0;
+byte sequence[game_sequence_length] {0};
+
+
+
+
+
 void setup()
 {
-  sequenceOptionsLength = sizeof(sequenceLeds) / sizeof(Led);
-  sequenceLength =  sizeof(sequence) / sizeof(byte);
   
 
   lcd.init();
@@ -41,15 +64,15 @@ void setup()
 
   AddSequenceDifficulty();
 
-  gameMode = 0;
+  //gameMode = 0;
 }
 
 
 void loop()
 { 
-  gameMode = SelectMode();
+  //gameMode = SelectMode();
 
-  ShowCurrentSequence(gameMode);
+  //ShowCurrentSequence(gameMode);
   
   if(CheckPlayerSequence())
   {
@@ -81,10 +104,10 @@ byte SelectMode(){
 void AddSequenceDifficulty()
 {
   Serial.println("Adding difficulty");
-  sequence[currentSequenceLength] = random(0,sequenceOptionsLength);
+  sequence[currentSequenceLength] = random(0,sequence_options_length);
   currentSequenceLength++;
   
-  if(currentSequenceLength >= sequenceLength)
+  if(currentSequenceLength >= game_sequence_length)
   {
     Serial.println("Max score reached");
     currentSequenceLength = 0;
@@ -100,9 +123,9 @@ void ShowCurrentSequence(byte mode)
     case 0:
       for(int e = 0; e < currentSequenceLength; e++)
       {
-        sequenceLeds[sequence[e]].on(buzzer,musicalNotes[sequence[e]], 100);
+        sequenceLeds[sequence[e]].OnWithSound(false,buzzer,musicalNotes[sequence[e]], 100);
         delay(color_show_delay);
-        sequenceLeds[sequence[e]].off();
+        sequenceLeds[sequence[e]].Off();
         delay(between_color_delay);
       } 
     break;
@@ -110,16 +133,16 @@ void ShowCurrentSequence(byte mode)
     case 1:
       for(int e = 0; e < currentSequenceLength; e++)
       {
-        for(int l = 0; l < sequenceOptionsLength; l++){
+        for(int l = 0; l < sequence_options_length; l++){
           if(l != sequence[e]){
-            sequenceLeds[l].on();  
+            sequenceLeds[l].On();  
           }
         }
         delay(color_show_delay);
 
-        for(int l = 0; l < sequenceOptionsLength; l++){
+        for(int l = 0; l < sequence_options_length; l++){
           if(l != sequence[e]){
-            sequenceLeds[l].off();  
+            sequenceLeds[l].Off();  
           }
         }
         delay(between_color_delay);
@@ -135,20 +158,20 @@ bool CheckPlayerSequence()
   
   while(element < currentSequenceLength)
   {
-    for(int i = 0; i < sequenceOptionsLength; i++)
+    for(int i = 0; i < sequence_options_length; i++)
       {
         if(sequenceButtons[i].isPressed())
         {
           Serial.println("entrou");
           if(i == sequence[element])
           {
-            sequenceLeds[i].on(buzzer,musicalNotes[i], 100);
+            sequenceLeds[i].OnWithSound(false,buzzer,musicalNotes[i], 100);
             delay(10);
             while(sequenceButtons[i].isPressed()){
               delay(10);
             }
             element++;
-            sequenceLeds[i].off();
+            sequenceLeds[i].Off();
             Serial.println("ok");
            
           }
@@ -166,5 +189,3 @@ bool CheckPlayerSequence()
   
 	return true;
 }
-
-

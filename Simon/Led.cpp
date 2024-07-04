@@ -2,22 +2,23 @@
   
 Led::Led(byte pin) {
   this->pin = pin;
-  init();
+  Init();
 }
   
-void Led::init() {
+void Led::Init() {
   pinMode(pin, OUTPUT);
 }
   
-void Led::on() {
+void Led::On() {
   digitalWrite(pin, HIGH);
 }
 
-void Led::on(byte buzzer, int note,int duration) {
-  tone(buzzer,note,duration);
+void Led::OnWithSound(bool muted,byte buzzer, int note,int duration) {
   digitalWrite(pin, HIGH);
+  
+  if(!muted) tone(buzzer,note,duration);
 }
 
-void Led::off() {
+void Led::Off() {
   digitalWrite(pin, LOW);            
 }

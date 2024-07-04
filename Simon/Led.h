@@ -9,9 +9,9 @@ class Led {
     
   public:
     Led(byte pin);
-    void init();
-    void on();
-    void on(byte,int,int);
-    void off();
+    void Init();
+    void On();
+    void OnWithSound(bool,byte,int,int);
+    void Off();
 };
 #endif

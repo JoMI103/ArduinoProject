@@ -15,6 +15,10 @@ bool NewRecord();
 void LoadScoreData();
 void SaveHighScore();
 
+void LcdPrint(char, char);
+void LcdPrint(String, String);
+
+
 
 #define between_color_delay 200
 #define color_show_delay 400
@@ -51,21 +55,13 @@ struct Player{
 
 
 Settings currentSettings = {
-  false
+  true
 };
 
 
 Player currentPlayer;
 
 Player modeHighScore[game_modes_number];
-
-
-
-
-
-
-
-
 
 
 void setup()
@@ -76,8 +72,9 @@ void setup()
     }
   }
   
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
+  //Serial.print("bom dia");
   lcd.init();
   lcd.backlight();
   
@@ -87,53 +84,50 @@ void setup()
     0, 0, "Guest"
   };
 
-  AddSequenceDifficulty();
+  //AddSequenceDifficulty();
 }
-
-
-
 
 void loop()
 { 
-
+  //LcdPrint("OAL","EWJFWEO");
+  //while(true) delay(1000);
   MainMenu();
-while(true) delay(1000);
+  delay(500);
+  currentSequenceLength = 0;
+  AddSequenceDifficulty();
 
-  ShowCurrentSequence(currentPlayer.GameMode);
-  
-  if(CheckPlayerSequence())
+  while(currentSequenceLength != 0)
   {
-    AddSequenceDifficulty();
-  }
-  else
-  {
-    Serial.println("Wrong color. resetting game");
-    if( NewRecord()){
-      //write name 
-      SaveHighScore();
+    LcdPrint(String("Score: ") + (currentSequenceLength - 1), "HS:");
+    //get highscore;
+
+    ShowCurrentSequence(currentPlayer.GameMode);
+
+    if(CheckPlayerSequence())
+    {
+      AddSequenceDifficulty();
     }
+    else
+    {
+      LcdPrint("Wrong color", "resetting game");
+      
+      if( NewRecord()){
+        //write name 
+        SaveHighScore();
+      }
 
-    for(int i = 0; i < 3; i++){
-      Serial.println(modeHighScore[i].name);
-      Serial.print(modeHighScore[i].Score);
+      for(int i = 0; i < 3; i++){
+        Serial.println(modeHighScore[i].name);
+        Serial.print(modeHighScore[i].Score);
+      }
+
+      currentSequenceLength = 0;
     }
-
-	  currentSequenceLength = 0;
+    
+    delay(500);
   }
-
-
-
-  lcd.setCursor(0,0);
-  
-  lcd.print(currentSequenceLength);
-  
-
-  
   delay(1500);
-  Serial.println("Starting new game");
- // }
 }
-
 
 int GetInput(){
   for(int i = 0; i < sequence_options_length; i++)
@@ -153,7 +147,7 @@ int GetInput(){
     return -1;
 }
 
-#pragma region ScreenMenu Methods
+#pragma region LCD Methods
 
 //red, Green, blue, yellow
 void LcdPrint(char firstRow[], char secondRow[]){
@@ -175,34 +169,59 @@ void LcdPrint(String firstRow, String secondRow){
 }
 
 
+#pragma endregion LCD Methods
+
+#pragma region ScreenMenu Methods
+
+
+
 
 
 void MainMenu(){
   char sound;
-  if(currentSettings.Muted) sound = "M"; else sound = "S";
 
-  LcdPrint( String("R-Play ") +"G-Mode:" + currentPlayer.GameMode ,String("B-HighScores") + "Y-" + sound );
 
   int selectedOption = -1;
+  bool changed = true;
+  int selectedOptionHSMenu = -1;
+  bool changedHSMenu = true;
 
   while(selectedOption != 0){
-    int selectedOption = GetInput();
+
+
+    if(changed){
+      if(currentSettings.Muted) sound = 'm'; else sound ='s';
+      LcdPrint( String("R-Play ") +"G-Mode:" + currentPlayer.GameMode ,String("B-HighScores") + " Y-" + sound );
+
+    }  
+
+
+    selectedOption = GetInput();
     
+    changed = true;
+
     switch(selectedOption){
       case 0: break;
-      case 1:
+      case 1: 
         currentPlayer.GameMode++;
         if(currentPlayer.GameMode >= game_modes_number)
         currentPlayer.GameMode = 0;
 
        break;
       case 2:
-      
+
+        while(selectedOptionHSMenu != 0){
+
+
+          
+        }
 
       
 
        break;
       case 3: currentSettings.Muted = !currentSettings.Muted; break;
+
+      default: changed = false; break;
     }
     delay(10);
 

@@ -225,8 +225,8 @@ void MainMenu(){
             case 0: selectedOption = -1; break;
             case 1:
               checkingModeRecord++;
-              //if(checkingModeRecord >= game_modes_number)
-              //checkingModeRecord = 0;
+              if(checkingModeRecord >= game_modes_number)
+              checkingModeRecord = 0;
 
              break;
             default: changedHSMenu = false; break;
@@ -254,7 +254,7 @@ void SaveRecordMenu()
   bool changed = true;
 
   int selectedChar = 0;
-  char name[10] = {'a','a','a','a','a','a','a','a','a','a'};
+  char name[10] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
   char final[16] = {0};
   while(selectedChar < 11)
   {
@@ -269,7 +269,7 @@ void SaveRecordMenu()
           final[i] = ',';
           
         }
-        if(i > selectedChar){
+        if(i >= selectedChar){
           final[i+1] = name[i];  
         }else{
           final [i] = name[i];

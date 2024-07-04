@@ -148,6 +148,21 @@ int GetInput(){
     return -1;
 }
 
+int GetFreeInput(){
+  for(int i = 0; i < sequence_options_length; i++)
+    {
+      if(sequenceButtons[i].isPressed())
+      {
+        
+        delay(10);
+        sequenceLeds[i].Off();
+        return i;
+        
+      }
+    }
+    return -1;
+}
+
 #pragma region LCD Methods
 
 //red, Green, blue, yellow
@@ -294,17 +309,21 @@ void SaveRecordMenu()
       case 2: if(selectedChar < 10){
         
         name[selectedChar]--;
+        if(name[selectedChar] < " ")
+        name[selectedChar] = "z";
 
 
       } break;
       case 3: if(selectedChar < 10){
          name[selectedChar]++;
+         if(name[selectedChar] > "z")
+         name[selectedChar] = " ";
 
       } break;
       default: changed = false; break; 
     }
 
-    delay(10);
+    delay(100);
   }
 
 }

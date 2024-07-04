@@ -253,10 +253,11 @@ void SaveRecordMenu()
   bool changed = true;
 
   int selectedChar = 0;
-  char name[10] {"          "};
-  char final[16];
-  while(selectedChar < 11){
-
+  String name = "          ";
+  String final = "                ";
+  while(selectedChar < 11)
+  {
+     //LcdPrint("Cona","Cona" );
     if(changed)
     {
 
@@ -306,6 +307,8 @@ void SaveRecordMenu()
       } break;
       default: changed = false; break; 
     }
+
+    delay(10);
   }
 
 }

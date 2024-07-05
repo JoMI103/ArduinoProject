@@ -66,26 +66,48 @@ Player modeHighScore[game_modes_number];
 
 
 void setup()
-{  
-  if(true){
+{
+  
+  byte seed = EEPROM.read(99);
+  randomSeed(seed);
+  seed ++;
+  if(seed > 250){
+    seed = 0;
+  } 
+  EEPROM.write(99, seed);
+
+  Serial.begin(9600);
+ 
+  for(int i = 0; i < game_modes_number; i++)
+    {
+      modeHighScore[i] = Player {
+        i,0,"         "
+      };
+    }
+
+  if(false){
     for(int i = 0; i < 250; i++){
       EEPROM.write(i, 0);
     }
   }
+
+  
   
   lcd.init();
   lcd.backlight();
   
-  LoadScoreData();
+  
+
+  
 
   currentPlayer = Player{
-    0, 0, "Guest"
+    0, 0, "         "
   };
 }
 
 void loop()
 { 
-
+  LoadScoreData();
   MainMenu();
   delay(500);
   currentSequenceLength = 0;
@@ -95,7 +117,7 @@ void loop()
   {
     LcdPrint(
       String("Score: ") + (currentSequenceLength - 1), 
-      String("") + "HS:" + modeHighScore[currentPlayer.GameMode].name + "-" + modeHighScore[currentPlayer.GameMode].Score);
+      String("") + "HS:" + modeHighScore[currentPlayer.GameMode].name + ":" + (modeHighScore[currentPlayer.GameMode].Score - 1));
 
 
     ShowCurrentSequence(currentPlayer.GameMode);
@@ -228,7 +250,8 @@ void MainMenu(){
         while(selectedOptionHSMenu != 0){
           if(changedHSMenu)
           {
-            LcdPrint( String("Mode:") + checkingModeRecord + " Record",String("") + modeHighScore[checkingModeRecord].name + "-" + modeHighScore[checkingModeRecord].Score);
+            LcdPrint( String("") + "Mode:" + checkingModeRecord + " Record",
+            String("") + modeHighScore[checkingModeRecord].name + ":" + (modeHighScore[checkingModeRecord].Score - 1) );
           }
           changedHSMenu = true;
           
@@ -244,6 +267,20 @@ void MainMenu(){
               checkingModeRecord = 0;
 
              break;
+             case 3:{
+
+              Serial.println(" ");
+              Serial.println(" ");
+              Serial.println(" ");
+              Serial.println("new entry");
+              Serial.println(" ");
+                for(int i = 0; i < 100; i++){
+                      Serial.print(EEPROM.read(i));
+                      Serial.print(" ");
+                      if((i+1) % 20 == 0) 
+                      Serial.println("");
+                    }
+             } break;
             default: changedHSMenu = false; break;
           }
 
@@ -272,13 +309,13 @@ void SaveRecordMenu()
   bool changed = true;
 
   int selectedChar = 0;
-  char name[10] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
+  char name[10] = {' ',' ',' ',' ',' ',' ',' ',' ',' ','\0'};
   char final[16] = {0};
 
 
   while(selectedChar < 11)
   {
-     //LcdPrint("Cona","Cona" );
+     
     if(changed)
     {
 
@@ -314,7 +351,7 @@ void SaveRecordMenu()
     switch(selectedOption){
       case 0: selectedChar--; if(selectedChar < 0) selectedChar = 0; nextDelay = 400; break;
       case 1:  selectedChar++;   nextDelay = 400; break;
-      case 2: if(selectedChar < 10){
+      case 2: if(selectedChar < 9){
         
         if(name[selectedChar] <= 32)
         name[selectedChar] = 'z';
@@ -324,12 +361,12 @@ void SaveRecordMenu()
         nextDelay = 50;
 
       } break;
-      case 3: if(selectedChar < 10){
+      case 3: if(selectedChar < 9){
          if(name[selectedChar] >= 122)
          name[selectedChar] = ' ';
          else
          name[selectedChar]++;
-         nextDelay = 50;
+         nextDelay = 100;
 
       } break;
       default: changed = false; break; 
@@ -350,22 +387,28 @@ void SaveRecordMenu()
 
 void LoadScoreData()
 {
+  int startIndex = 0;
   for(int i = 0; i < game_modes_number; i++)
   {
-    int startIndex = (i + 1) * 32;
+    modeHighScore[i] = Player {
+      i,0,"guest"
+    };
+
+    startIndex = i * 20;
     modeHighScore[i].GameMode = EEPROM.read(startIndex);
     modeHighScore[i].Score = EEPROM.read(startIndex + 1);
 
-    for(int n = 0; n < 10; n++)
+    for(int n = 0; n < 9; n++)
     {
       modeHighScore[i].name[n] = EEPROM.read(startIndex + 2 + n);
     }
+    modeHighScore[i].name[9] = '\0';
   }
 }
 
 bool NewRecord()
 {
-  int startIndex = (currentPlayer.GameMode + 1) * 32;
+  int startIndex = currentPlayer.GameMode * 20;
 
   if(currentSequenceLength > EEPROM.read(startIndex + 1))
   {
@@ -380,12 +423,18 @@ bool NewRecord()
 void SaveHighScore()
 {
 
-  int startIndex = (currentPlayer.GameMode + 1) * 32;
-  for(int i = startIndex; i < startIndex + 31; i++ ){
+  int startIndex = (currentPlayer.GameMode) * 20;
+  for(int i = startIndex; i < startIndex + 20; i++ ){
     EEPROM.write(i,0);
   }
 
-  modeHighScore[currentPlayer.GameMode] = currentPlayer;
+  modeHighScore[currentPlayer.GameMode].Score = currentPlayer.Score;
+  modeHighScore[currentPlayer.GameMode].GameMode = currentPlayer.GameMode;
+  for(int n = 0; n < 10; n++)
+  {
+    
+    modeHighScore[currentPlayer.GameMode].name[n] = currentPlayer.name[n];
+  }
 
 
   EEPROM.write(startIndex , modeHighScore[currentPlayer.GameMode].GameMode);
@@ -404,7 +453,15 @@ void SaveHighScore()
 
 void AddSequenceDifficulty(byte mode)
 {
-  
+  if(mode == 3 && currentSequenceLength > 2){
+    byte randomvalue= random(0,10);
+    Serial.print(randomvalue);
+    if(randomvalue > 4){
+      Serial.print("New random number");
+      byte ok =  random(0,currentSequenceLength-1);
+      sequence[ok] = random(0,sequence_options_length);
+    }
+  }
   Serial.println("Adding difficulty");
   sequence[currentSequenceLength] = random(0,sequence_options_length);
   currentSequenceLength++;
